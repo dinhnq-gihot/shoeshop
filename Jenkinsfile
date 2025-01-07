@@ -9,22 +9,18 @@ pipeline {
 
     stages {
         stage('Check for Tag') {
-            when {
-                // Run only if the build is triggered by a tag
-                expression {
-                    return env.BUILDING_TAG != null && env.BUILDING_TAG.startsWith('v')
-                }
+            if (!(env.BUILDING_TAG != null && env.BUILDING_TAG.startsWith('v'))) {
+                error("Build triggered, but no valid release tag (v*) found. Exiting...")
             }
-            steps {
-                echo "Build triggered by tag: ${env.BUILDING_TAG}"
-            }
+
+            echo "Triggered by release tag: ${env.BUILDING_TAG}"
         }
 
         stage('Docker Login') {
             steps {
                 script {
                     // Use Jenkins credentials for Docker login
-                    withCredentials([usernamePassword(credentialsId: 'docker-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    withCredentials([usernamePassword(credentialsId: 'github-action', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                         sh """
                         echo "$DOCKER_PASS" | docker login $DOCKER_REGISTRY -u "$DOCKER_USER" --password-stdin 
                         """
