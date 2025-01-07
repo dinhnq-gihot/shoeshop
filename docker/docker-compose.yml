@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    environment:
+      MYSQL_DATABASE: shoeshop
+      MYSQL_USER: shoeshop
+      MYSQL_PASSWORD: shoeshop
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./shoe_shopdb.sql:/docker-entrypoint-initdb.d/shoe_shopdb.sql:ro
+    networks:
+      - app-network
+
+  app:
+    container_name: spring_app
+    image: shoeshop:latest
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+volumes:
+  db_data:
+
+
+networks:
+  app-network:
