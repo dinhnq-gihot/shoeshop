@@ -4,9 +4,9 @@ pipeline {
     }
 
     stages {
-        stage('Example') {
+        stage('whoami') {
             steps {
-                echo 'Hello, Jenkins!'  // Print a message to the console
+                sh(script: """ whoami; """, label: "first stage")
             }
         }
     }
