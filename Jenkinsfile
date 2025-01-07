@@ -9,11 +9,31 @@ pipeline {
 
     stages {
         stage('Check for Tag') {
-            if (!(env.BUILDING_TAG != null && env.BUILDING_TAG.startsWith('v'))) {
-                error("Build triggered, but no valid release tag (v*) found. Exiting...")
-            }
+            steps {
+                script {
+                    if (!(env.BUILDING_TAG != null && env.BUILDING_TAG.startsWith('v'))) {
+                        error("Build triggered, but no valid release tag (v*) found. Exiting...")
+                    }
 
-            echo "Triggered by release tag: ${env.BUILDING_TAG}"
+                    echo "Triggered by release tag: ${env.BUILDING_TAG}"
+                }
+            }
+        }
+
+        stage('Check for Tag') {
+            steps {
+                script {
+                    // Get the current tag, if any
+                    env.GIT_TAG = sh(script: "git describe --tags --exact-match || echo ''", returnStdout: true).trim()
+
+                    // Ensure the pipeline only runs for tags starting with 'v'
+                    if (!env.GIT_TAG.startsWith('v')) {
+                        error("Build triggered, but no valid release tag (v*) found. Exiting...")
+                    }
+
+                    echo "Triggered by release tag: ${env.GIT_TAG}"
+                }
+            }
         }
 
         stage('Docker Login') {
